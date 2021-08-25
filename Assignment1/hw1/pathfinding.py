@@ -117,8 +117,10 @@ class MazeState:
     @classmethod
     def is_goal(cls, state: MazeState) -> bool:
         """Return True if `state` is the goal."""
-        x,y = find_agent(state.grid)
-        if x == 8 and y == 8:
+        agent = find_agent(state.grid)
+        goal = tuple([ i-2 for i in list(state.grid.shape)])
+
+        if agent == goal:
             return True
         else:
             return False
@@ -134,8 +136,8 @@ class MazeState:
         """
         #Manhattan distance
         x,y = find_agent(state.grid)
-        goal = (8,8)
-        h = abs(x-8)+abs(y-8)
+        goal = tuple([ i-2 for i in list(state.grid.shape)])
+        h = abs(x-goal[0])+abs(y-goal[1])
         return h
 # %%
 
