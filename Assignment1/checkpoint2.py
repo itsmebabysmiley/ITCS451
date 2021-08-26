@@ -16,7 +16,7 @@ PRIORITY2 = a_star_priority
 
 
 def trace_plan(init_state: MazeState, plan: List[str]):
-    grid = np.arange(init_state.grid)
+    grid = np.array(init_state.grid)
     x, y = find_agent(grid)
     cur_state = init_state
     for action in plan:
@@ -52,11 +52,14 @@ if plan1 is not None:
     trace_plan(init_state, plan1)
 print('=' * 50)
 
-print('Algorithm:', PRIORITY2.__name__)
-plan2, cost2 = graph_search(init_state, PRIORITY2)
-print('Plan:', plan2)
-print('Cost:', cost1)
-if plan2 is not None:
-    print('Steps:', len(plan2))
-    trace_plan(init_state, plan2)
-print('=' * 50)
+# print('Initial State:')
+# print(render_maze(init_state.grid))
+# print('=' * 50)
+# print('Algorithm:', PRIORITY2.__name__)
+# plan1, cost1 = graph_search(init_state, PRIORITY2)
+# print('Plan:', plan1)
+# print('Cost:', cost1)
+# if plan1 is not None:
+#     print('Steps:', len(plan1))
+#     trace_plan(init_state, plan1)
+# print('=' * 50)

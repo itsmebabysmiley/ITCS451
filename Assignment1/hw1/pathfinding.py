@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Tuple, List, Callable, Union
 from hw1.envutil import render_maze, find_agent
-
+from queue import PriorityQueue
 import numpy as np
 
 @dataclass(frozen=True, unsafe_hash=False)
@@ -120,10 +120,7 @@ class MazeState:
         agent = find_agent(state.grid)
         goal = tuple([ i-2 for i in list(state.grid.shape)])
 
-        if agent == goal:
-            return True
-        else:
-            return False
+        return agent == goal
 
     # TODO 6: Create a heuristic function
     @classmethod
@@ -134,6 +131,7 @@ class MazeState:
         ---------------
         You may come up with your own heuristic function.
         """
+
         #Manhattan distance
         x,y = find_agent(state.grid)
         goal = tuple([ i-2 for i in list(state.grid.shape)])
@@ -143,12 +141,18 @@ class MazeState:
 
 @dataclass
 class TreeNode:
-    path_cost: float
+    path_cost: float #g(n)
+    h_score = float("inf")
+    f_score = float("inf")
     state: MazeState
     action: str
     depth: int
     parent: TreeNode = None
 
+    # def __eq__(self, other):
+    #     return self.depth == other.depth
+    # def __lt__(self, other):
+    #     return self.path_cost < other.path_cost
 
 def dfs_priority(node: TreeNode) -> float:
     return -1.0 * node.depth
@@ -160,12 +164,12 @@ def bfs_priority(node: TreeNode) -> float:
 
 # TODO: 7 Create a priority function for the greedy search
 def greedy_priority(node: TreeNode) -> float:
-    return 0.0
+    return MazeState.heuristic(node.state)
 
 
 # TODO: 8 Create a priority function for the A* search
 def a_star_priority(node: TreeNode) -> float:
-    return 0.0
+    return node.path_cost + MazeState.heuristic(node.state)
 
 
 # TODO: 9 Implement the graph search algorithm.
@@ -176,4 +180,58 @@ def graph_search(
 
     If the solution cannot be found, return None and infinite cost.
     """
+
+    open_set = []
+    close_set = []
+    depth = 0
+    node = TreeNode(0.0,init_state,init_state.actions[0],depth,None)
+    open_set.append(node)
+    grid = init_state.grid
+    list_actions = [] #close set
+    track_agent = []
+    total_cost = 0.0
+    while len(open_set) > 0:
+        #do here
+        #if goal state return true
+        open_set.sort()
+        current_state  = open_set.pop(0)
+        close_set.append(current_state)
+
+        # #find agent for what? idk
+        # current_agent = find_agent(current_grid)
+        # track_agent.append(current_agent)
+        
+        #current is goal return list of actions.
+        if MazeState.is_goal(current_state.state):
+            return list_actions, total_cost
+        #find neighbors
+        current_grid = current_state.state.grid
+        actions = ["North", "South", "East", "West"]
+        neighbors = []
+        depth += 1
+        for i in actions:
+            state1 = current_state.state
+            state2 = MazeState.transition(state1,i)
+            cost = MazeState.cost(state1,i)
+            if state2 is None:
+                pass #wall 
+            else:
+                temp_node = TreeNode(cost,state2,i,depth,current_state)
+                h_score = greedy_priority(temp_node)
+                f_score = a_star_priority(temp_node)
+                temp_node.h_score = h_score
+                temp_node.f_score = f_score
+                neighbors.append(temp_node)
+        #greedy
+        if priority_func.__name__ == 'greedy_priority':
+            neighbors.sort(key=lambda TreeNode: TreeNode.h_score, reverse=False)
+        #a_star
+        else:
+            neighbors.sort(key=lambda TreeNode: TreeNode.f_score, reverse=False)
+        #min(f(n)) or min(h(n))
+        action = neighbors[0].action
+        list_actions.append(action)
+        total_cost += neighbors[0].path_cost #cost from start -> current
+        # print(f'agent:{(current_agent[1],current_agent[0])} | f(n): {[i.f_score for i in neighbors]}')
+        open_set.append(neighbors[0])
     return None, float('inf')
