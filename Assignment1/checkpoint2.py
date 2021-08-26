@@ -36,15 +36,39 @@ def trace_plan(init_state: MazeState, plan: List[str]):
         cur_state = new_state
     print(render_maze(grid))
 
-
+my_grid = np.array(
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,2,7,0,1,1,1,1,1,1],
+        [1,7,1,0,0,0,1,1,1,1],
+        [1,0,7,1,1,0,0,0,0,1],
+        [1,0,0,1,1,1,1,0,0,1],
+        [1,0,0,0,1,1,1,7,0,1],
+        [1,1,7,0,0,7,0,0,0,1],
+        [1,1,7,1,1,1,1,7,0,1],
+        [1,1,0,0,7,0,0,0,6,1],
+        [1,1,1,1,1,1,1,1,1,1],
+    ])
 init_maze = gen_maze(SIZE, add_mud=ADD_MUD)
 init_state = MazeState(init_maze)
+
+# print('Initial State:')
+# print(render_maze(init_state.grid))
+# print('=' * 50)
+# print('Algorithm:', PRIORITY1.__name__)
+# plan1, cost1 = graph_search(init_state, PRIORITY1)
+# print('Plan:', plan1)
+# print('Cost:', cost1)
+# if plan1 is not None:
+#     print('Steps:', len(plan1))
+#     trace_plan(init_state, plan1)
+# print('=' * 50)
 
 print('Initial State:')
 print(render_maze(init_state.grid))
 print('=' * 50)
-print('Algorithm:', PRIORITY1.__name__)
-plan1, cost1 = graph_search(init_state, PRIORITY1)
+print('Algorithm:', PRIORITY2.__name__)
+plan1, cost1 = graph_search(init_state, PRIORITY2)
 print('Plan:', plan1)
 print('Cost:', cost1)
 if plan1 is not None:
@@ -52,14 +76,3 @@ if plan1 is not None:
     trace_plan(init_state, plan1)
 print('=' * 50)
 
-# print('Initial State:')
-# print(render_maze(init_state.grid))
-# print('=' * 50)
-# print('Algorithm:', PRIORITY2.__name__)
-# plan1, cost1 = graph_search(init_state, PRIORITY2)
-# print('Plan:', plan1)
-# print('Cost:', cost1)
-# if plan1 is not None:
-#     print('Steps:', len(plan1))
-#     trace_plan(init_state, plan1)
-# print('=' * 50)
