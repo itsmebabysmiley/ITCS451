@@ -9,8 +9,8 @@ from hw1.pathfinding import (
 
 
 # CHANGE SETTINGS TO TEST YOUR CODE HERE
-SIZE = 20
-ADD_MUD = False
+SIZE = 10
+ADD_MUD = True
 PRIORITY1 = greedy_priority
 PRIORITY2 = a_star_priority
 

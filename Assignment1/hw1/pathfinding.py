@@ -178,6 +178,15 @@ def a_star_priority(node: TreeNode) -> float:
 
 
 
+def reconstruct_paths(node: TreeNode):
+    x = []
+    total_cost = node.path_cost
+    while node.parent != None:
+        x.append(node.action)
+        node = node.parent
+    x.reverse()
+    return x,total_cost
+
 
 # TODO: 9 Implement the graph search algorithm.
 def graph_search(
@@ -187,6 +196,10 @@ def graph_search(
 
     If the solution cannot be found, return None and infinite cost.
     """
+    ##for visualization##
+    vis_grid = np.array(init_state.grid)
+    ##for visualization##
+
     open_set = SimplePriorityQueue()
     open_list = []
     close_set = []
@@ -200,75 +213,60 @@ def graph_search(
             f_score[(i,j)] = float('inf')
     (x,y) = find_agent(init_state.grid)
     g_score[(y,x)] = 0
-    fScore = MazeState.heuristic(init_state)
-    f_score[(y,x)] = fScore
+    hScore = MazeState.heuristic(init_state)
+    f_score[(y,x)] = hScore
     node = TreeNode(0,init_state,"North",0, None)
     node.g_score = 0.0
-    node.f_score = fScore
+    node.f_score = hScore
     node.position = (y,x)
 
-    open_set.add((y,x),node,fScore)
+    open_set.add((y,x),node,hScore)
     
     while not open_set.is_empty():
         count += 1
         current = open_set.pop(); #node
-        print(f'[{count}] agent:{current.position}')
-        print(render_maze(current.state.grid))
-        # print(current)
+        ##for visualize##
+        print(f'[{count}] agent:{current.position} f(n): {current.f_score} g(n):{current.g_score}')
+
+        vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
+        print(render_maze(vis_grid))
+        ##for visualize##
         if MazeState.is_goal(current.state):
-            print(len(close_set))
-            temp = np.array(init_state.grid)
-            for i in range(len(temp)):
-                for j in range(len(temp)):
-                    if (i,j) in close_set:
-                        temp[i,j] = 8
-            print(render_maze(temp))
-            x = []
-            while current.parent != None:
-                print(current.action)
-                x.append(current.action)
-                current = current.parent
-            return x, float(99.9)
-        # open_set.pop()
-        # open_list.pop(0)
+            actions, total_cost = reconstruct_paths(current)
+            return actions, total_cost
+
         close_set.append(current.position)
-        # print(f'open set: {open_list}')
-        # print(f'close set: {close_set}')
+        #Find neighbors
         actions = ['North', 'South', 'East', 'West']
-        #if action is possible add it to neighbors of current
         neighbors = []
-        pos_neighbors = []
-        # print('*' * 5 + 'Neighbors' + '*'*5)
         for action in actions:
             state = MazeState.transition(current.state, action)
             
-            #wall or last state
+            #wall
             if state is None:
                 pass
             else:
                 (x,y) = find_agent(state.grid)
                 neighbor_loc = (y,x)
-
+                #Explore the neighbor
                 if neighbor_loc not in close_set:
-                    tempG = current.g_score + 1
+                    tempG = current.g_score + MazeState.cost(current.state, action) #distance(current,neighbor)
+
                     if not open_set.is_in(neighbor_loc):
                         path_cost = MazeState.cost(current.state, action)+current.path_cost
                         neighbor = TreeNode(path_cost,state,action,count,current)
                         neighbor.position = neighbor_loc
                         neighbor.g_score = g_score[neighbor_loc] = path_cost
+                        neighbor.f_score = f_score[neighbor_loc] = a_star_priority(neighbor)
                         open_set.add(neighbor.position, neighbor, neighbor.f_score)
-                        neighbor.f_score = a_star_priority(neighbor)
-                        print(f'state:{neighbor.position} path_cost: {neighbor.path_cost} fn: {neighbor.f_score}')
-                        
+                        print(f'neighbor:{neighbor.position} path_cost: {neighbor.path_cost} fn: {neighbor.f_score}')
+                    #If in openset and has better G(n), then update G(n)    
                     elif tempG <= g_score[neighbor_loc]:
                             neighbor.g_score = tempG
                             neighbor.f_score = a_star_priority(neighbor)
-                            print(f'update neighbor: {neighbor.position}')
+                            print(f'update neighbor: {neighbor.position} f(n): {neighbor.f_score}')
                 else:
                     pass   
-       
-        # print(f'next state:{next_state.position} path_cost: {next_state.path_cost} f(n): {next_state.f_score} ')
-        # print(f'gS(cur) {current[1].g_score} d(c,n) {neighbor.path_cost}')
     return None, float('inf')
 
 
