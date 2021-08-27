@@ -9,8 +9,8 @@ from hw1.pathfinding import (
 
 
 # CHANGE SETTINGS TO TEST YOUR CODE HERE
-SIZE = 10
-ADD_MUD = True
+SIZE = 20
+ADD_MUD = False
 PRIORITY1 = greedy_priority
 PRIORITY2 = a_star_priority
 
@@ -22,6 +22,7 @@ def trace_plan(init_state: MazeState, plan: List[str]):
     for action in plan:
         new_state = MazeState.transition(cur_state, action)
         if new_state is None:
+            print(find_agent(cur_state.grid),action)
             raise ValueError('Impossible action in the plan!')
         new_x, new_y = find_agent(new_state.grid)
         if new_x == x and new_y == y:
@@ -49,9 +50,21 @@ my_grid = np.array(
         [1,1,0,0,7,0,0,0,6,1],
         [1,1,1,1,1,1,1,1,1,1],
     ])
+no_wall = np.array(
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,2,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,6,1],
+        [1,1,1,1,1,1,1,1,1,1],
+    ])
 init_maze = gen_maze(SIZE, add_mud=ADD_MUD)
 init_state = MazeState(init_maze)
-
 # print('Initial State:')
 # print(render_maze(init_state.grid))
 # print('=' * 50)
