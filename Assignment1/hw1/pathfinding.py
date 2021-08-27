@@ -225,12 +225,14 @@ def graph_search(
     while not open_set.is_empty():
         count += 1
         current = open_set.pop(); #node
-        ##for visualize##
-        print(f'[{count}] agent:{current.position} f(n): {current.f_score} g(n):{current.g_score}')
+        
+        ##for visualization##
+        # print(f'[{count}] agent:{current.position} f(n): {current.f_score} g(n):{current.g_score}')
 
-        vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
-        print(render_maze(vis_grid))
-        ##for visualize##
+        # vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
+        # print(render_maze(vis_grid))
+        ##for visualization##
+        
         if MazeState.is_goal(current.state):
             actions, total_cost = reconstruct_paths(current)
             return actions, total_cost
@@ -253,20 +255,32 @@ def graph_search(
                     tempG = current.g_score + MazeState.cost(current.state, action) #distance(current,neighbor)
 
                     if not open_set.is_in(neighbor_loc):
+                        
                         path_cost = MazeState.cost(current.state, action)+current.path_cost
                         neighbor = TreeNode(path_cost,state,action,count,current)
                         neighbor.position = neighbor_loc
-                        neighbor.g_score = g_score[neighbor_loc] = path_cost
-                        neighbor.f_score = f_score[neighbor_loc] = a_star_priority(neighbor)
-                        open_set.add(neighbor.position, neighbor, neighbor.f_score)
-                        print(f'neighbor:{neighbor.position} path_cost: {neighbor.path_cost} fn: {neighbor.f_score}')
+                        
+                        if priority_func.__name__ == 'a_star_priority':
+                            neighbor.g_score = g_score[neighbor_loc] = path_cost
+                            neighbor.f_score = f_score[neighbor_loc] = a_star_priority(neighbor)
+                            open_set.add(neighbor.position, neighbor, neighbor.f_score)
+                        #greedy search
+                        else:
+                            hScore = MazeState.heuristic(neighbor.state)
+                            open_set.add(neighbor.position, neighbor, hScore)
+                            # print(f'neighbor:{neighbor.position} path_cost: {neighbor.path_cost} h: {neighbor.f_score}')
+
                     #If in openset and has better G(n), then update G(n)    
                     elif tempG <= g_score[neighbor_loc]:
                             neighbor.g_score = tempG
                             neighbor.f_score = a_star_priority(neighbor)
-                            print(f'update neighbor: {neighbor.position} f(n): {neighbor.f_score}')
+                            # print(f'update neighbor: {neighbor.position} f(n): {neighbor.f_score}')
                 else:
-                    pass   
+                    pass 
+                # for k,v in g_score.items():
+                #     if v != float('inf'):
+                #         print(f'{k}: {v}')
+
     return None, float('inf')
 
 
