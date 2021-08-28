@@ -148,9 +148,9 @@ class TreeNode:
     parent: TreeNode = None
 
     position: tuple[int] = (np.nan,np.nan)
-    g_score = float("inf")
-    f_score = float("inf")
-    h_score = float("inf")
+    # g_score = float("inf")
+    # f_score = float("inf")
+    # h_score = float("inf")
 
     # def print_tree(self):
     #     if self.parent != None:
@@ -201,7 +201,7 @@ def graph_search(
     ##for visualization##
 
     open_set = SimplePriorityQueue()
-    open_list = []
+    came_from = []
     close_set = []
     g_score = {}
     f_score = {}
@@ -212,12 +212,12 @@ def graph_search(
             g_score[(i,j)] = float('inf')
             f_score[(i,j)] = float('inf')
     (x,y) = find_agent(init_state.grid)
-    g_score[(y,x)] = 0
+    g_score[(y,x)] = 0  ##for visualization##
     hScore = MazeState.heuristic(init_state)
-    f_score[(y,x)] = hScore
+    f_score[(y,x)] = hScore ##for visualization##
     node = TreeNode(0,init_state,"North",0, None)
-    node.g_score = 0.0
-    node.f_score = hScore
+    # node.g_score = 0.0
+    # node.f_score = hScore #start node use h score
     node.position = (y,x)
 
     open_set.add((y,x),node,hScore)
@@ -227,14 +227,15 @@ def graph_search(
         current = open_set.pop(); #node O(1)
         
         #for visualization##
-        # print(f'[{count}] agent:{current.position} f(n): {current.f_score} g(n):{current.g_score}')
-
-        # vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
-        # print(render_maze(vis_grid))
+        print(f'[{count}] agent:{current.position} f(n): {f_score[current.position]} g(n):{g_score[current.position]}')
+        vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
+        print(render_maze(vis_grid))
         #for visualization##
         
         if MazeState.is_goal(current.state):
             actions, total_cost = reconstruct_paths(current)
+            # x = [i.position for i in came_from]
+            # print(x[1:])
             return actions, total_cost
 
         close_set.append(current.position)
@@ -252,32 +253,43 @@ def graph_search(
                 neighbor_loc = (y,x)
                 #Explore the neighbor
                 if neighbor_loc not in close_set:
-                    tempG = current.g_score + MazeState.cost(current.state, action) #distance(current,neighbor)
+                    # tempG = current.g_score + MazeState.cost(current.state, action) #distance(current,neighbor)
+                    tempG = g_score[current.position] + MazeState.cost(current.state, action) #distance(current,neighbor)
+                    # print(f'tempG: {tempG} Gs: {g_score[neighbor_loc]} [{tempG < g_score[neighbor_loc]}]')
+                    
+                    #check this one carefully
+                    if tempG <= g_score[neighbor_loc]: 
+                        came_from.append(current)
+                        neighbor_node = TreeNode(float('inf'),state,action,count,current)
+                        neighbor_node.position = neighbor_loc
+                        # neighbor_node.path_cost = neighbor_node.g_score = g_score[neighbor_loc] = tempG
+                        neighbor_node.path_cost = g_score[neighbor_loc] = tempG
+                        # neighbor_node.f_score = f_score[neighbor_loc] = a_star_priority(neighbor_node)
+                        f_score[neighbor_loc] = a_star_priority(neighbor_node)
+                        # print(f'Node: {neighbor_node.position} g_score: {neighbor_node.g_score} f_score:{neighbor_node.f_score}')
+                        if not open_set.is_in(neighbor_loc):
+                            # open_set.add(neighbor_node.position, neighbor_node, neighbor_node.f_score)
+                            open_set.add(neighbor_node.position, neighbor_node, f_score[neighbor_loc])
+                            # print(f'{neighbor_loc} in openSet? : {open_set.is_in(neighbor_loc)}')
 
-                    if not open_set.is_in(neighbor_loc):
+
+                    # if not open_set.is_in(neighbor_loc):
                         
-                        path_cost = MazeState.cost(current.state, action)+current.path_cost
-                        neighbor = TreeNode(path_cost,state,action,count,current)
-                        neighbor.position = neighbor_loc
-                        
-                        if priority_func.__name__ == 'a_star_priority':
-                            neighbor.g_score = g_score[neighbor_loc] = path_cost
-                            neighbor.f_score = f_score[neighbor_loc] = a_star_priority(neighbor)
-                            open_set.add(neighbor.position, neighbor, neighbor.f_score)
-                        #greedy search
-                        else:
-                            hScore = MazeState.heuristic(neighbor.state)
-                            open_set.add(neighbor.position, neighbor, hScore)
+                    #     path_cost = MazeState.cost(current.state, action)+current.path_cost
+                    #     neighbor = TreeNode(path_cost,state,action,count,current)
+                    #     neighbor.position = neighbor_loc
+                    #     neighbor.g_score = g_score[neighbor_loc] = path_cost
+                    #     neighbor.f_score = f_score[neighbor_loc] = a_star_priority(neighbor)
+                    #     open_set.add(neighbor.position, neighbor, neighbor.f_score)
                             # print(f'neighbor:{neighbor.position} path_cost: {neighbor.path_cost} h: {neighbor.f_score}')
 
                     #If in openset and has better G(n), then update G(n)    
-                    elif tempG < g_score[neighbor_loc]:
-                            neighbor.g_score = tempG
-                            neighbor.f_score = a_star_priority(neighbor)
+                    # elif tempG < g_score[neighbor_loc]:
+                    #         neighbor.g_score = tempG
+                    #         neighbor.f_score = a_star_priority(neighbor)
                             # print(f'update neighbor: {neighbor.position} f(n): {neighbor.f_score}')
-                else:
-                    pass 
-                # for k,v in g_score.items():
+
+                # for k,v in f_score.items():
                 #     if v != float('inf'):
                 #         print(f'{k}: {v}')
 
