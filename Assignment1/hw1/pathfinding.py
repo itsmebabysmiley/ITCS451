@@ -178,7 +178,7 @@ def a_star_priority(node: TreeNode) -> float:
 # Show every step the agent made. 
 def visualize_step(node: TreeNode, grid: np.array, g_score: Tuple):
 
-    print(f'[{node.depth}] agent:{node.position} g(n):{g_score}')
+    print(f'agent:{node.position} g(n):{g_score} depth={node.depth}')
     grid[node.position] = 9 if grid[node.position] == 7 else 8
     print(render_maze(grid))
     print('~~'*np.shape(grid)[0])
@@ -213,10 +213,10 @@ def graph_search(
     g_score = {(i,j): float('inf') for i in range(size[0]) for j in range(size[0])}
     h_score = {(i,j): float('inf') for i in range(size[0]) for j in range(size[0])}
     f_score = {(i,j): float('inf') for i in range(size[0]) for j in range(size[0])}
-    count = 0   #depth
+    count = 0   #count is count no matter what. hehe
 
     (x,y) = find_agent(init_state.grid)
-    g_score[(y,x)] = 0  
+    g_score[(y,x)] = 0
     hScore = MazeState.heuristic(init_state)
     f_score[(y,x)] = hScore #start node use h score
     init_node = TreeNode(0,init_state,"None",0, None)
@@ -228,8 +228,12 @@ def graph_search(
         count += 1
         current = open_set.pop(); #node O(1)
         
-        ##for visualization##
-        visualize_step(grid = vis_grid, node = current, g_score = g_score[current.position])
+
+        '''for visualization'''
+        # print(f'[{count}]',end=' ')
+        # visualize_step(grid = vis_grid, node = current, g_score = g_score[current.position])
+        '''for visualization'''
+
 
         #is goal?
         if MazeState.is_goal(current.state):
@@ -257,7 +261,7 @@ def graph_search(
                         tempG = g_score[current.position] + MazeState.cost(current.state, action) #g(cur)+distance(current,neighbor)
                         
                         #better path update the g score and f score
-                        if tempG <= g_score[neighbor_loc]: 
+                        if tempG <= g_score[neighbor_loc]:
                             came_from.append(current)
 
                             neighbor_node = TreeNode(float('inf'),state,action,current.depth+1,current)
@@ -272,7 +276,7 @@ def graph_search(
                 else:
                     #find h score and use as a priority.
                     path_cost = MazeState.cost(current.state, action) + current.path_cost
-                    neighbor_node = TreeNode(path_cost,state,action,count,current.depth+1,position = neighbor_loc)
+                    neighbor_node = TreeNode(path_cost, state, action,current.depth+1, current, position = neighbor_loc)
                     g_score[neighbor_loc] = path_cost
                     h_score[neighbor_loc] = MazeState.heuristic(neighbor_node.state)
                     open_set.add(neighbor_loc,neighbor_node,h_score[neighbor_loc])        
