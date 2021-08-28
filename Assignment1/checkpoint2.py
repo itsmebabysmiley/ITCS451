@@ -9,7 +9,7 @@ from hw1.pathfinding import (
 
 
 # CHANGE SETTINGS TO TEST YOUR CODE HERE
-SIZE = 8
+SIZE = 10
 ADD_MUD = True
 PRIORITY1 = greedy_priority
 PRIORITY2 = a_star_priority
@@ -54,9 +54,9 @@ no_wall = np.array(
     [
         [1,1,1,1,1,1,1,1,1,1],
         [1,2,0,0,0,0,0,0,0,1],
-        [1,0,0,0,1,0,0,0,0,1],
-        [1,0,0,1,1,0,0,0,0,1],
-        [1,0,1,1,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,1],
         [1,0,0,0,0,0,0,0,0,1],
@@ -64,19 +64,19 @@ no_wall = np.array(
         [1,1,1,1,1,1,1,1,1,1],
     ])
 init_maze = gen_maze(SIZE, add_mud=ADD_MUD)
-init_state = MazeState(no_wall)
+init_state = MazeState(init_maze)
 
-# print('Initial State:')
-# print(render_maze(init_state.grid))
-# print('=' * 50)
-# print('Algorithm:', PRIORITY1.__name__)
-# plan1, cost1 = graph_search(init_state, PRIORITY1)
-# print('Plan:', plan1)
-# print('Cost:', cost1)
-# if plan1 is not None:
-#     print('Steps:', len(plan1))
-#     trace_plan(init_state, plan1)
-# print('=' * 50)
+print('Initial State:')
+print(render_maze(init_state.grid))
+print('=' * 50)
+print('Algorithm:', PRIORITY1.__name__)
+plan1, cost1 = graph_search(init_state, PRIORITY1)
+print('Plan:', plan1)
+print('Cost:', cost1)
+if plan1 is not None:
+    print('Steps:', len(plan1))
+    trace_plan(init_state, plan1)
+print('=' * 50)
 
 print('Initial State:')
 print(render_maze(init_state.grid))
