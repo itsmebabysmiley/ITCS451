@@ -224,14 +224,14 @@ def graph_search(
     
     while not open_set.is_empty():
         count += 1
-        current = open_set.pop(); #node
+        current = open_set.pop(); #node O(1)
         
-        ##for visualization##
+        #for visualization##
         # print(f'[{count}] agent:{current.position} f(n): {current.f_score} g(n):{current.g_score}')
 
         # vis_grid[current.position] = 9 if vis_grid[current.position] == 7 else 8
         # print(render_maze(vis_grid))
-        ##for visualization##
+        #for visualization##
         
         if MazeState.is_goal(current.state):
             actions, total_cost = reconstruct_paths(current)
@@ -271,7 +271,7 @@ def graph_search(
                             # print(f'neighbor:{neighbor.position} path_cost: {neighbor.path_cost} h: {neighbor.f_score}')
 
                     #If in openset and has better G(n), then update G(n)    
-                    elif tempG <= g_score[neighbor_loc]:
+                    elif tempG < g_score[neighbor_loc]:
                             neighbor.g_score = tempG
                             neighbor.f_score = a_star_priority(neighbor)
                             # print(f'update neighbor: {neighbor.position} f(n): {neighbor.f_score}')

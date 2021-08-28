@@ -41,7 +41,7 @@ my_grid = np.array(
     [
         [1,1,1,1,1,1,1,1,1,1],
         [1,2,7,0,1,1,1,1,1,1],
-        [1,7,1,0,0,0,1,1,1,1],
+        [1,7,1,0,0,0,7,7,7,1],
         [1,0,7,1,1,0,0,0,0,1],
         [1,0,0,1,1,1,1,0,0,1],
         [1,0,0,0,1,1,1,7,0,1],
@@ -64,7 +64,7 @@ no_wall = np.array(
         [1,1,1,1,1,1,1,1,1,1],
     ])
 init_maze = gen_maze(SIZE, add_mud=ADD_MUD)
-init_state = MazeState(init_maze)
+init_state = MazeState(my_grid)
 print('Initial State:')
 print(render_maze(init_state.grid))
 print('=' * 50)
