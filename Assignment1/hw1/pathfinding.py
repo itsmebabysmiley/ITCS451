@@ -23,7 +23,7 @@ class MazeState:
     # TODO 2 Create a list of all possible actions.
     # Please replace it with your own actions
     # Note that an agent can only rotate and move forward.
-    actions: Tuple[str] = ('North', 'South', 'East', 'West')
+    actions: Tuple[str] = ('Move North', 'Move South', 'Move East', 'Move West')
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, MazeState):
@@ -54,16 +54,16 @@ class MazeState:
         x,y = find_agent(state.grid)
         temp_grid = np.array(state.grid)
         #check action is possible
-        if action == 'North' and state.grid[y-1 ,x] != 1:
+        if action == 'Move North' and state.grid[y-1 ,x] != 1:
             temp_grid[y,x] = 0
             temp_grid[y-1,x] = 2
-        elif action == 'South' and state.grid[y+1, x] != 1:
+        elif action == 'Move South' and state.grid[y+1, x] != 1:
             temp_grid[y,x] = 0
             temp_grid[y+1,x] = 4
-        elif action == 'East' and state.grid[y, x+1] != 1:
+        elif action == 'Move East' and state.grid[y, x+1] != 1:
             temp_grid[y,x] = 0
             temp_grid[y,x+1] = 3
-        elif action == 'West' and state.grid[y, x-1] != 1:
+        elif action == 'Move West' and state.grid[y, x-1] != 1:
             temp_grid[y,x] = 0
             temp_grid[y,x-1] = 5
         #wall
@@ -88,18 +88,19 @@ class MazeState:
         a mod position should cost more than walking into an empty position.
         """
         x,y = find_agent(state.grid)
-        if action == 'North':
+        if action == 'Move North':
             cell = state.grid[y-1 ,x]
-        elif action == 'South':
+        elif action == 'Move South':
             cell = state.grid[y+1, x]
-        elif action == 'East':
+        elif action == 'Move East':
             cell = state.grid[y, x+1]
-        elif action == 'West':
+        elif action == 'Move West':
             cell = state.grid[y, x-1]
 
         #wall
         if cell == 1:
             return float('inf')
+        #cost from current to next state.
         #mud cost 10. normal cost 1
         else:
             return 10 if cell == 7 else 1
@@ -234,7 +235,8 @@ def graph_search(
         close_set.append(current.position)
 
         #Explore the neighbors
-        for action in ['North', 'South', 'East', 'West']:
+        actions = ['Move North', 'Move South', 'Move East', 'Move West']
+        for action in actions:
             state = MazeState.transition(current.state, action)
             
             #wall
