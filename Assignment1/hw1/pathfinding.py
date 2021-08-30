@@ -1,11 +1,7 @@
 """This module contains classes and function to solve a pathfinding problem.
 
 Author: Nopparat Pengsuk
-    -
-    -
 Student ID: 6288103
-    -
-    -
 """
 
 # %%
@@ -56,10 +52,6 @@ class MazeState:
         array y immutable (cannot be changed, for safty).
         """
         x,y = find_agent(state.grid)
-        # print(y,x)
-        # current = np.where(np.isin(state.grid, [2,3,4,5]))
-        # y, x = current[0], current[1]
-        # print(y,x)
         temp_grid = np.array(state.grid)
         #check action is possible
         if action == 'North' and state.grid[y-1 ,x] != 1:
@@ -80,7 +72,6 @@ class MazeState:
 
         temp_grid.flags.writeable = False
         new_state = MazeState(temp_grid)
-        # print(new_state.grid)
         return new_state
 
     # TODO 4: Create a cost function
@@ -97,8 +88,6 @@ class MazeState:
         a mod position should cost more than walking into an empty position.
         """
         x,y = find_agent(state.grid)
-        # current = np.where(np.isin(state.grid, [2,3,4,5]))
-        # y, x = current[0], current[1]
         if action == 'North':
             cell = state.grid[y-1 ,x]
         elif action == 'South':
@@ -108,10 +97,13 @@ class MazeState:
         elif action == 'West':
             cell = state.grid[y, x-1]
 
+        #wall
         if cell == 1:
             return float('inf')
+        #mud cost 10. normal cost 1
         else:
             return 10 if cell == 7 else 1
+
 
     # TODO 5: Create a goal test function
     @classmethod
@@ -148,8 +140,6 @@ class TreeNode:
     parent: TreeNode = None
     #keep track location of the node
     position: Tuple[int] = (np.nan,np.nan)
-    # def __init__(self, position):
-    #     self.position = position
 
     # def print_tree(self):
     #     if self.parent != None:
@@ -271,7 +261,9 @@ def graph_search(
                             
                             if not open_set.is_in(neighbor_loc):                            
                                 open_set.add(neighbor_node.position, neighbor_node, f_score[neighbor_loc])
-                
+                    else:
+                        #smile to the camare!
+                        pass
                 #greedy search
                 else:
                     #find h score and use as a priority.
