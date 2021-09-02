@@ -64,7 +64,7 @@ no_wall = np.array(
         [1,1,1,1,1,1,1,1,1,1],
     ])
 init_maze = gen_maze(SIZE, add_mud=ADD_MUD)
-init_state = MazeState(init_maze)
+init_state = MazeState(no_wall)
 
 print('Initial State:')
 print(render_maze(init_state.grid))

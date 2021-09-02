@@ -2,6 +2,7 @@
 
 Author: Nopparat Pengsuk
 Student ID: 6288103
+pseudocode : https://en.wikipedia.org/wiki/A*_search_algorithm
 """
 
 # %%
@@ -110,9 +111,9 @@ class MazeState:
     @classmethod
     def is_goal(cls, state: MazeState) -> bool:
         """Return True if `state` is the goal."""
-        agent = find_agent(state.grid)
+        x,y = find_agent(state.grid)
+        agent = (y,x) 
         goal = tuple([ i-2 for i in list(state.grid.shape)])
-
         return agent == goal
 
     # TODO 6: Create a heuristic function
@@ -126,7 +127,7 @@ class MazeState:
         """
 
         #Manhattan distance
-        (x1,y1) = find_agent(state.grid)
+        (y1,x1) = find_agent(state.grid)
         (x2,y2) = tuple([ i-2 for i in list(state.grid.shape)])
         h = abs(x1-x2)+abs(y1-y2)
         return h
@@ -253,7 +254,7 @@ def graph_search(
                         tempG = g_score[current.position] + MazeState.cost(current.state, action) #g(cur)+distance(current,neighbor)
                         
                         #better path update the g score and f score
-                        if tempG <= g_score[neighbor_loc]:
+                        if tempG < g_score[neighbor_loc]:
                             came_from.append(current)
 
                             neighbor_node = TreeNode(float('inf'),state,action,current.depth+1,current)
