@@ -11,7 +11,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from tabulate import tabulate
 import numpy as np
@@ -73,7 +73,7 @@ class TicTacToeState:
         
         #start here
         board = np.array(state.board).flatten()
-        if board[action] != 0:
+        if board[action] != 0 or action == None:
             return None
         else:
             board[action] = 1 if state.curPlayer == Player.X else 2
@@ -82,12 +82,14 @@ class TicTacToeState:
                 next_play = Player.O
             else:
                 next_play = Player.X
+
+            board_2d.flags.writeable = False
             new_board = TicTacToeState(board_2d, next_play)
             return new_board
 
 
     @classmethod
-    def is_someone_win(cls, state: TicTacToeState) -> Tuple(bool, Player) :
+    def is_someone_win(cls, board: np.array) -> Tuple[bool, Player] :
 
         win = [
                 [0,1,2],
@@ -99,15 +101,17 @@ class TicTacToeState:
                 [0,4,8],
                 [2,4,6]]
        
-        if state.curPlayer == Player.X:
-            position = np.where(state.board.flatten() == 1)
-        else:
-            position = np.where(state.board.flatten() == 2)
-        
-        #someone win?
+       
+        position = np.where(board.flatten() == 1)
         for w in win:
             if all(x in position[0] for x in w):
-                return True, state.curPlayer
+                return True, Player.X
+        position = np.where(board.flatten() == 2)
+        for w in win:
+            if all(x in position[0] for x in w):
+                return True, Player.O
+        #someone win?
+        
         return False, None
 
 
@@ -117,7 +121,7 @@ class TicTacToeState:
         """Return `True` is the `state` is terminal (end of the game)."""
 
         #start here
-        win = TicTacToeState.is_someone_win(state)
+        win = TicTacToeState.is_someone_win(state.board)
         if win[0]:
             return True
 
@@ -144,10 +148,9 @@ class TicTacToeState:
         if not TicTacToeState.isTerminal(state):
             return None
 
-        win = TicTacToeState.is_someone_win(state)
+        win = TicTacToeState.is_someone_win(state.board)
         win, p = win
-        # print(f'win?{win[0]} player{player} {(win[1] == player)}')
-        
+                
         if not win:
             return 0
 
@@ -156,7 +159,6 @@ class TicTacToeState:
         else:
             return -1
 
-        return 'how the hell?'
 
     def __repr__(self) -> str:
         a = [[symbol_map[c] for c in row] for row in self.board]
@@ -207,8 +209,90 @@ class MinimaxBot(StupidBot):
 
     # TODO 6: Implement Minimax Decision algorithm
     def play(self, state: TicTacToeState) -> Union[int, None]:
-        """Return an action to play or None to skip."""
-        return super().play(state)
+        """Return an action to play or None to skip.""" 
+        gBoard = np.array([
+            [0,1,2],
+            [3,4,5],
+            [6,7,8],
+            ])
+
+        maxEval = np.NINF
+        action = None
+        board = np.array(state.board)
+        for i in range(3):
+            for j in range(3):
+                if board[i,j] == 0:
+                    board[i,j] = 1
+                    eva = MinimaxBot.minimax(board, 0 , False)
+                    board[i,j] = 0
+                    if(eva > maxEval):
+                        maxEval = eva
+                        action = (i,j)
+                        
+        return gBoard[action] 
+
+
+    def checkWinner(board):
+        win = [
+                [0,1,2],
+                [3,4,5],
+                [6,7,8],
+                [0,3,6],
+                [1,4,7],
+                [2,5,8],
+                [0,4,8],
+                [2,4,6]]
+
+        position = np.where(board.flatten() == 1)
+        for w in win:
+            if all(x in position[0] for x in w):
+                return 1
+        position = np.where(board.flatten() == 2)
+        for w in win:
+            if all(x in position[0] for x in w):
+                return -1
+        full = np.where(board.flatten() == 0)
+        if full[0].size == 0:
+            return 0
+        
+        return None
+
+
+    def minimax(board, depth , maximizingPlayer):
+        # print(f'depth = {depth}')
+        #terminal case
+        win = MinimaxBot.checkWinner(board)
+        if win != None:
+            return win
+        
+        if maximizingPlayer:
+            value = np.NINF
+            for i in range(3):
+                for j in range(3):
+                    if board[i,j] == 0:
+                        board[i,j] = 1
+                        score = MinimaxBot.minimax(board, depth+1, False)
+                        board[i,j] = 0
+                        if( score > value):
+                            value = score
+                        # value = max(value, score)
+            # print(f'max value = {value}')
+            return value
+
+        # minimizingPlayer
+        else:
+            value = np.Inf
+            for i in range(3):
+                for j in range(3):
+                    if board[i,j] == 0:
+                        board[i,j] = 2
+                        score = MinimaxBot.minimax(board, depth+1, True)
+                        board[i,j] = 0
+                        if( score < value):
+                            value = score
+                        # value = min(value, score)
+            return value
+        
 
 
 class AlphaBetaBot(StupidBot):
