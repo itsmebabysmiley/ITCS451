@@ -9,8 +9,10 @@ from hw2 import tictactoe as TTT
 # Change this to your bots.
 # botX = TTT.StupidBot(TTT.Player.X)
 botX = TTT.MinimaxBot(TTT.Player.X)
+# botX = TTT.AlphaBetaBot(TTT.Player.X)
 # botO = TTT.StupidBot(TTT.Player.O)
-botO = TTT.HumanPlayer(TTT.Player.O)
+# botO = TTT.HumanPlayer(TTT.Player.O)
+botO = TTT.MinimaxBot(TTT.Player.O)
 
 
 init_state = TTT.TicTacToeState(np.zeros((3, 3), dtype=np.uint8), TTT.Player.X)

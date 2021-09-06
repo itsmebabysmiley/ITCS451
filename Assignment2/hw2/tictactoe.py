@@ -222,7 +222,10 @@ class MinimaxBot(StupidBot):
         for i in range(3):
             for j in range(3):
                 if board[i,j] == 0:
-                    board[i,j] = 1
+                    if self.player == Player.X:
+                        board[i,j] = 1
+                    else:
+                        board[i,j] = 2
                     eva = MinimaxBot.minimax(board, 0 , False)
                     board[i,j] = 0
                     if(eva > maxEval):
@@ -231,7 +234,7 @@ class MinimaxBot(StupidBot):
                         
         return gBoard[action] 
 
-
+    #my utility
     def checkWinner(board):
         win = [
                 [0,1,2],
@@ -273,9 +276,7 @@ class MinimaxBot(StupidBot):
                         board[i,j] = 1
                         score = MinimaxBot.minimax(board, depth+1, False)
                         board[i,j] = 0
-                        if( score > value):
-                            value = score
-                        # value = max(value, score)
+                        value = max(value, score)
             # print(f'max value = {value}')
             return value
 
@@ -288,9 +289,7 @@ class MinimaxBot(StupidBot):
                         board[i,j] = 2
                         score = MinimaxBot.minimax(board, depth+1, True)
                         board[i,j] = 0
-                        if( score < value):
-                            value = score
-                        # value = min(value, score)
+                        value = min(value, score)
             return value
         
 
@@ -302,5 +301,69 @@ class AlphaBetaBot(StupidBot):
 
     # TODO 7: Implement Alpha-Beta Decision algorithm
     def play(self, state: TicTacToeState) -> Union[int, None]:
-        """Return an action to play or None to skip."""
-        return super().play(state)
+        """Return an action to play or None to skip.""" 
+        gBoard = np.array([
+            [0,1,2],
+            [3,4,5],
+            [6,7,8],
+            ])
+
+        maxEval = np.NINF
+        action = None
+        board = np.array(state.board)
+        for i in range(3):
+            for j in range(3):
+                if board[i,j] == 0:
+                    board[i,j] = 1
+                    eva = MinimaxBot.minimax(board, 0 , False)
+                    board[i,j] = 0
+                    if(eva > maxEval):
+                        maxEval = eva
+                        action = (i,j)
+                        
+        return gBoard[action] 
+
+    
+    def minimax( board, depth, maximizingPlayer, alpha, beta ):
+        #terminal case
+        win = MinimaxBot.checkWinner(board)
+        if win != None:
+            return win
+        
+        if maximizingPlayer:
+            value = np.NINF
+            flag = False
+            for i in range(3):
+                for j in range(3):
+                    if board[i,j] == 0:
+                        board[i,j] = 1
+                        score = AlphaBetaBot.minimax(board, depth+1, False, alpha, beta)
+                        board[i,j] = 0
+                        value = max(value, score)
+                        alpha = max(alpha, score)
+                        if beta <= alpha:
+                            flag = True
+                            break
+                if flag:
+                    break
+            # print(f'max value = {value}')
+            return value
+
+        # minimizingPlayer
+        else:
+            value = np.Inf
+            flag = False
+            for i in range(3):
+                for j in range(3):
+                    if board[i,j] == 0:
+                        board[i,j] = 2
+                        score = AlphaBetaBot.minimax(board, depth+1, True, alpha, beta)
+                        board[i,j] = 0
+                        value = min(value, score)
+                        beta = min(beta, score)
+                        if beta <= alpha:
+                            flag = True
+                            break
+                if flag:
+                    break
+            return value
