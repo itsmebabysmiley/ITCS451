@@ -45,7 +45,9 @@ class TicTacToeState:
         In Tic-Tac-Toe, a player can always make a move as long as there is
         an empty spot. If the board is full, however, return an empty list.
         """
-        return []
+        #start here
+        board = np.array(state.board).flatten()
+        return [i for i in range(len(board)) if board[i] == 0]
 
     # TODO 3: Create a transtion function
     @classmethod
@@ -68,12 +70,63 @@ class TicTacToeState:
         array y immutable (cannot be changed, for safty).
         """
         # return TicTacToeState(.....)
-        return None
+        
+        #start here
+        board = np.array(state.board).flatten()
+        if board[action] != 0:
+            return None
+        else:
+            board[action] = 1 if state.curPlayer == Player.X else 2
+            board_2d = np.reshape(board, (3, 3))
+            if state.curPlayer == Player.X:
+                next_play = Player.O
+            else:
+                next_play = Player.X
+            new_board = TicTacToeState(board_2d, next_play)
+            return new_board
+
+
+    @classmethod
+    def is_someone_win(cls, state: TicTacToeState) -> Tuple(bool, Player) :
+
+        win = [
+                [0,1,2],
+                [3,4,5],
+                [6,7,8],
+                [0,3,6],
+                [1,4,7],
+                [2,5,8],
+                [0,4,8],
+                [2,4,6]]
+       
+        if state.curPlayer == Player.X:
+            position = np.where(state.board.flatten() == 1)
+        else:
+            position = np.where(state.board.flatten() == 2)
+        
+        #someone win?
+        for w in win:
+            if all(x in position[0] for x in w):
+                return True, state.curPlayer
+        return False, None
+
 
     # TODO 4: Create a terminal test function
     @classmethod
     def isTerminal(cls, state: TicTacToeState) -> bool:
         """Return `True` is the `state` is terminal (end of the game)."""
+
+        #start here
+        win = TicTacToeState.is_someone_win(state)
+        if win[0]:
+            return True
+
+        # #board full? tie?
+        full = np.where(state.board.flatten() == 0)
+        if full[0].size == 0:
+            return True
+
+        #not full and not win
         return False
 
     # TODO 5: Create a utility function
@@ -85,7 +138,25 @@ class TicTacToeState:
 
         The `player` can be different than the `state`.`curPlayer`.
         """
-        return None
+
+        #utilities are -1,0,+1
+        
+        if not TicTacToeState.isTerminal(state):
+            return None
+
+        win = TicTacToeState.is_someone_win(state)
+        win, p = win
+        # print(f'win?{win[0]} player{player} {(win[1] == player)}')
+        
+        if not win:
+            return 0
+
+        if win and (p == player):
+            return 1
+        else:
+            return -1
+
+        return 'how the hell?'
 
     def __repr__(self) -> str:
         a = [[symbol_map[c] for c in row] for row in self.board]
@@ -102,7 +173,7 @@ class StupidBot:
     def play(self, state: TicTacToeState) -> Union[int, None]:
         """Return an action to play or None to skip."""
         # pretend to be thinking
-        time.sleep(1)
+        # time.sleep(1)
 
         # return random action
         valid_actions = TicTacToeState.actions(state)
