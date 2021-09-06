@@ -11,7 +11,6 @@ from hw2 import tictactoe as TTT
 botX = TTT.MinimaxBot(TTT.Player.X)
 # botX = TTT.AlphaBetaBot(TTT.Player.X)
 # botO = TTT.StupidBot(TTT.Player.O)
-# botO = TTT.HumanPlayer(TTT.Player.O)
 botO = TTT.MinimaxBot(TTT.Player.O)
 
 
