@@ -45,7 +45,7 @@ class TicTacToeState:
         In Tic-Tac-Toe, a player can always make a move as long as there is
         an empty spot. If the board is full, however, return an empty list.
         """
-        #start here
+        #convert to 1d array and return list of empty cells
         board = np.array(state.board).flatten()
         return [i for i in range(len(board)) if board[i] == 0]
 
@@ -73,6 +73,7 @@ class TicTacToeState:
         
         #start here
         board = np.array(state.board).flatten()
+        #action is impossible
         if board[action] != 0 or action == None:
             return None
         else:
@@ -84,7 +85,7 @@ class TicTacToeState:
                 next_play = Player.X
 
             board_2d.flags.writeable = False
-            new_board = TicTacToeState(board_2d, next_play)
+            new_board = TicTacToeState(board_2d, next_play) #should it be which player? opponent or yourself?
             return new_board
 
 
@@ -121,11 +122,11 @@ class TicTacToeState:
         """Return `True` is the `state` is terminal (end of the game)."""
 
         #start here
-        win = TicTacToeState.is_someone_win(state.board)
-        if win[0]:
+        win, p = TicTacToeState.is_someone_win(state.board)
+        if win:
             return True
 
-        # #board full? tie?
+        #board full? tie?
         full = np.where(state.board.flatten() == 0)
         if full[0].size == 0:
             return True
@@ -220,25 +221,23 @@ class MinimaxBot(StupidBot):
         action = None
         board = np.array(state.board)
         empty_board = np.where(state.board.flatten() == 0)
+        #board empty? random
         if len(empty_board[0]) == 9:
             return np.random.randint(0, 9)
+        
+        #find the appropriate action.
         for i in range(3):
             for j in range(3):
                 if board[i,j] == 0:
                     if self.player == Player.X:
                         board[i,j] = 1
-                        eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
                     else:
-                        # print(f'{self.player} {self.player == Player.O}')
                         board[i,j] = 2
-                        eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
-                    # eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
-                    # print(f'{eva} {(i,j)}')
+                    eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
                     board[i,j] = 0
                     if(eva > maxEval):
                         maxEval = eva
                         action = (i,j)
-        # print(f'max = {maxEval}')
                         
         return gBoard[action] 
 
@@ -272,7 +271,6 @@ class MinimaxBot(StupidBot):
 
 
     def minimax(board, depth , maximizingPlayer, player):
-        # print(f'depth = {depth}')
         #terminal case
         win = MinimaxBot.checkWinner(board)
         if win != None:
@@ -284,7 +282,7 @@ class MinimaxBot(StupidBot):
                 return 1
             if (win == -1) and (player == Player.X):
                 return -1
-            return win
+            return win #tie
         
         if maximizingPlayer:
             value = np.NINF
@@ -298,7 +296,6 @@ class MinimaxBot(StupidBot):
                         score = MinimaxBot.minimax(board, depth+1, False, player)
                         board[i,j] = 0
                         value = max(value, score)
-            # print(f'max value = {value}')
             return value
 
         # minimizingPlayer
@@ -331,7 +328,6 @@ class AlphaBetaBot(StupidBot):
             [3,4,5],
             [6,7,8],
             ])
-        # print(state.board)
         maxEval = np.NINF
         action = None
         board = np.array(state.board)
@@ -343,18 +339,13 @@ class AlphaBetaBot(StupidBot):
                 if board[i,j] == 0:
                     if self.player == Player.X:
                         board[i,j] = 1
-                        eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
                     else:
-                        # print(f'{self.player} {self.player == Player.O}')
                         board[i,j] = 2
-                        eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
-                    # eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
-                    # print(f'{eva} {(i,j)}')
+                    eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
                     board[i,j] = 0
                     if(eva > maxEval):
                         maxEval = eva
                         action = (i,j)
-        # print(f'max = {maxEval}')
                         
         return gBoard[action] 
 
@@ -392,7 +383,6 @@ class AlphaBetaBot(StupidBot):
                             break
                 if flag:
                     break
-            # print(f'max value = {value}')
             return value
 
         # minimizingPlayer
