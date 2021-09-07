@@ -331,27 +331,46 @@ class AlphaBetaBot(StupidBot):
             [3,4,5],
             [6,7,8],
             ])
-
+        # print(state.board)
         maxEval = np.NINF
         action = None
         board = np.array(state.board)
+        empty_board = np.where(state.board.flatten() == 0)
+        if len(empty_board[0]) == 9:
+            return np.random.randint(0, 9)
         for i in range(3):
             for j in range(3):
                 if board[i,j] == 0:
-                    board[i,j] = 1
-                    eva = MinimaxBot.minimax(board, 0 , False)
+                    if self.player == Player.X:
+                        board[i,j] = 1
+                        eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
+                    else:
+                        # print(f'{self.player} {self.player == Player.O}')
+                        board[i,j] = 2
+                        eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
+                    # eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
+                    # print(f'{eva} {(i,j)}')
                     board[i,j] = 0
                     if(eva > maxEval):
                         maxEval = eva
                         action = (i,j)
+        # print(f'max = {maxEval}')
                         
         return gBoard[action] 
 
     
-    def minimax( board, depth, maximizingPlayer, alpha, beta ):
+    def minimax( board, depth, maximizingPlayer, player, alpha, beta ):
         #terminal case
         win = MinimaxBot.checkWinner(board)
         if win != None:
+            if (win == 1) and (player == Player.X):
+                return 1
+            if (win == 1) and (player == Player.O):
+                return -1
+            if (win == -1) and (player == Player.O):
+                return 1
+            if (win == -1) and (player == Player.X):
+                return -1
             return win
         
         if maximizingPlayer:
@@ -360,8 +379,11 @@ class AlphaBetaBot(StupidBot):
             for i in range(3):
                 for j in range(3):
                     if board[i,j] == 0:
-                        board[i,j] = 1
-                        score = AlphaBetaBot.minimax(board, depth+1, False, alpha, beta)
+                        if player == Player.X:
+                            board[i,j] = 1
+                        else:
+                            board[i,j] = 2
+                        score = AlphaBetaBot.minimax(board, depth+1, False, player, alpha, beta)
                         board[i,j] = 0
                         value = max(value, score)
                         alpha = max(alpha, score)
@@ -380,8 +402,11 @@ class AlphaBetaBot(StupidBot):
             for i in range(3):
                 for j in range(3):
                     if board[i,j] == 0:
-                        board[i,j] = 2
-                        score = AlphaBetaBot.minimax(board, depth+1, True, alpha, beta)
+                        if player == Player.X:
+                            board[i,j] = 2
+                        else:
+                            board[i,j] = 1
+                        score = AlphaBetaBot.minimax(board, depth+1, True, player, alpha, beta)
                         board[i,j] = 0
                         value = min(value, score)
                         beta = min(beta, score)
