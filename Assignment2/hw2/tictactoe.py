@@ -213,7 +213,7 @@ class MinimaxBot(StupidBot):
 
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
                 value = MinimaxBot.minimax(temp_state, False)   
-                print(value)
+                # print(value)
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
                 # print(value)
@@ -222,8 +222,6 @@ class MinimaxBot(StupidBot):
                     move = action
             
             return move
-    
-    count = 0
     
     
     def minimax(state, maximizingPlayer):
@@ -268,4 +266,82 @@ class AlphaBetaBot(StupidBot):
     # TODO 7: Implement Alpha-Beta Decision algorithm
     def play(self, state: TicTacToeState) -> Union[int, None]:
         """Return an action to play or None to skip."""
-        return super().play(state)
+        
+        valid_actions = TicTacToeState.actions(state)
+        if len(valid_actions) == 0:
+            return None
+        else:
+            #board empty. randomly choose! don't have to thinking!
+            if len(valid_actions) == 9:
+                return np.random.randint(0, 9)
+            
+            move = None
+            maxEva = np.NINF
+            board = np.array(state.board).flatten()
+            for action in valid_actions:
+                #whos turn?
+                board[action] = 1 if self.player == Player.X else 2 
+
+                temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
+                alpha = np.NINF
+                beta = np.Inf
+                value = AlphaBetaBot.min_value(temp_state, alpha, beta) 
+                temp_state.board[borad_grid[action]] = 0 #reset board
+                temp_state.board.flags.writeable = False
+                # print(value)
+                if value > maxEva:
+                    maxEva = value
+                    move = action
+            
+            return move
+    
+    
+    def max_value(state, alpha, beta):
+        #terminal case
+        if TicTacToeState.isTerminal(state):
+            return TicTacToeState.utility(state, state.curPlayer)
+        
+        value = np.NINF
+        board = np.array(state.board).flatten()
+        valid_actions = TicTacToeState.actions(state)
+        for action in valid_actions:
+            #whos turn
+            board[action] = 1 if state.curPlayer == Player.X else 2
+            
+            temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
+            value = max(value, AlphaBetaBot.min_value(temp_state, alpha, beta))
+            temp_state.board[borad_grid[action]] = 0 #reset board
+            temp_state.board.flags.writeable = False
+            if value >= beta:
+                break
+            alpha = max(alpha, value)
+        return value
+    
+    
+    def min_value(state, alpha, beta):
+        #terminal case
+        if TicTacToeState.isTerminal(state):
+            return TicTacToeState.utility(state, state.curPlayer)
+        
+        value = np.Inf
+        board = np.array(state.board).flatten()
+        valid_actions = TicTacToeState.actions(state)
+        for action in valid_actions:
+            #whos turn
+            board[action] = 2 if state.curPlayer == Player.X else 1
+
+            temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
+            value = min(value, AlphaBetaBot.max_value(temp_state, alpha, beta))
+            temp_state.board[borad_grid[action]] = 0 #reset board
+            temp_state.board.flags.writeable = False
+            if value <= alpha:
+                break
+            beta = min(beta, value)
+        return value
+    
+    
+'''
+There are two ways to write alpha-beta. First is fail-hard. Second is fail-soft. I guess you
+you will learn it in CSPs, if Aj. teach.
+'''
+#itsmebabysmiley:)
