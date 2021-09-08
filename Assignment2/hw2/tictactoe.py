@@ -1,7 +1,7 @@
 """This module contains classes and functions for Tic-Tac-Toe.
 
 Members:
-1. Name: Nopparat Pengsuk  ID: 6288103
+1. Name:  ID:
 2. Name:  ID:
 3. Name:  ID:
 4. Name:  ID:
@@ -11,12 +11,27 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Union, Tuple
+from typing import List, Union
 
 from tabulate import tabulate
 import numpy as np
 
 symbol_map = ['_', 'X', 'O']
+win = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+      ]
+borad_grid = {  
+                0 : (0,0), 1 : (0,1), 2 : (0,2),
+                3 : (1,0), 4 : (1,1), 5 : (1,2),
+                6 : (2,0), 7 : (2,1), 8 : (2,2)}
+
 
 class Player(Enum):
     X = 1
@@ -45,7 +60,6 @@ class TicTacToeState:
         In Tic-Tac-Toe, a player can always make a move as long as there is
         an empty spot. If the board is full, however, return an empty list.
         """
-        #convert to 1d array and return list of empty cells
         board = np.array(state.board).flatten()
         return [i for i in range(len(board)) if board[i] == 0]
 
@@ -69,69 +83,37 @@ class TicTacToeState:
         This will create an array y as a copy of array x and then make
         array y immutable (cannot be changed, for safty).
         """
-        # return TicTacToeState(.....)
-        
-        #start here
         board = np.array(state.board).flatten()
-        #action is impossible
-        if board[action] != 0 or action == None:
+        #action is impossible?
+        if board[action] != 0:
             return None
         else:
             board[action] = 1 if state.curPlayer == Player.X else 2
             board_2d = np.reshape(board, (3, 3))
-            if state.curPlayer == Player.X:
-                next_play = Player.O
-            else:
-                next_play = Player.X
-
+            next_player = Player.O if state.curPlayer == Player.X else Player.X
             board_2d.flags.writeable = False
-            new_board = TicTacToeState(board_2d, next_play) #should it be which player? opponent or yourself?
+            new_board = TicTacToeState(board_2d, next_player) 
             return new_board
-
-
-    @classmethod
-    def is_someone_win(cls, board: np.array) -> Tuple[bool, Player] :
-
-        win = [
-                [0,1,2],
-                [3,4,5],
-                [6,7,8],
-                [0,3,6],
-                [1,4,7],
-                [2,5,8],
-                [0,4,8],
-                [2,4,6]]
-       
-       
-        position = np.where(board.flatten() == 1)
-        for w in win:
-            if all(x in position[0] for x in w):
-                return True, Player.X
-        position = np.where(board.flatten() == 2)
-        for w in win:
-            if all(x in position[0] for x in w):
-                return True, Player.O
-        #someone win?
-        
-        return False, None
 
 
     # TODO 4: Create a terminal test function
     @classmethod
     def isTerminal(cls, state: TicTacToeState) -> bool:
         """Return `True` is the `state` is terminal (end of the game)."""
-
-        #start here
-        win, p = TicTacToeState.is_someone_win(state.board)
-        if win:
-            return True
-
-        #board full? tie?
+        #3 possible ways that borad will terminate; playerX won or playerO won or Tie
+        positions = np.where(state.board.flatten() == 1)
+        for w in win:
+            if all(x in positions[0] for x in w):
+                return True #plauer X won
+        positions = np.where(state.board.flatten() == 2)
+        for w in win:
+            if all(x in positions[0] for x in w):
+                return True #player O won
         full = np.where(state.board.flatten() == 0)
         if full[0].size == 0:
-            return True
-
-        #not full and not win
+            return True #borad full. Tie?
+        
+        #not terminate
         return False
 
     # TODO 5: Create a utility function
@@ -143,23 +125,23 @@ class TicTacToeState:
 
         The `player` can be different than the `state`.`curPlayer`.
         """
-
-        #utilities are -1,0,+1
+        #You can use any value but I prefer -1,0,1 which are lose, tie and won respectively.
+        positions = np.where(state.board.flatten() == 1)
+        for w in win:
+            if all(x in positions[0] for x in w):
+                if player == Player.X:
+                    return 1 #player X won
+                else:
+                    return -1
+        positions = np.where(state.board.flatten() == 2)
+        for w in win:
+            if all(x in positions[0] for x in w):
+                if player == Player.O:
+                    return 1 #player O won
+                else:
+                    return -1
         
-        if not TicTacToeState.isTerminal(state):
-            return None
-
-        win = TicTacToeState.is_someone_win(state.board)
-        win, p = win
-                
-        if not win:
-            return 0
-
-        if win and (p == player):
-            return 1
-        else:
-            return -1
-
+        return 0 #tie
 
     def __repr__(self) -> str:
         a = [[symbol_map[c] for c in row] for row in self.board]
@@ -203,6 +185,8 @@ class HumanPlayer(StupidBot):
             return action
 
 
+
+
 class MinimaxBot(StupidBot):
 
     def __init__(self, player: Player) -> None:
@@ -210,111 +194,72 @@ class MinimaxBot(StupidBot):
 
     # TODO 6: Implement Minimax Decision algorithm
     def play(self, state: TicTacToeState) -> Union[int, None]:
-        """Return an action to play or None to skip.""" 
-        gBoard = np.array([
-            [0,1,2],
-            [3,4,5],
-            [6,7,8],
-            ])
-        # print(state.board)
-        maxEval = np.NINF
-        action = None
-        board = np.array(state.board)
-        empty_board = np.where(state.board.flatten() == 0)
-        #board empty? random
-        if len(empty_board[0]) == 9:
-            return np.random.randint(0, 9)
+        """Return an action to play or None to skip."""
         
-        #find the appropriate action.
-        for i in range(3):
-            for j in range(3):
-                if board[i,j] == 0:
-                    if self.player == Player.X:
-                        board[i,j] = 1
-                    else:
-                        board[i,j] = 2
-                    eva = MinimaxBot.minimax(board, 0 , False, state.curPlayer)
-                    board[i,j] = 0
-                    if(eva > maxEval):
-                        maxEval = eva
-                        action = (i,j)
-                        
-        return gBoard[action] 
-
-    #my utility
-    def checkWinner(board):
-        win = [
-                [0,1,2],
-                [3,4,5],
-                [6,7,8],
-                [0,3,6],
-                [1,4,7],
-                [2,5,8],
-                [0,4,8],
-                [2,4,6]]
-
-        position = np.where(board.flatten() == 2)
-        for w in win:
-            if all(x in position[0] for x in w):
-                return -1
+        valid_actions = TicTacToeState.actions(state)
+        if len(valid_actions) == 0:
+            return None
+        else:
+            #board empty. randomly choose! don't have to thinking!
+            if len(valid_actions) == 9:
+                return np.random.randint(0, 9)
             
-        position = np.where(board.flatten() == 1)
-        for w in win:
-            if all(x in position[0] for x in w):
-                return 1
-        
-        full = np.where(board.flatten() == 0)
-        if full[0].size == 0:
-            return 0
-        
-        return None
+            move = None
+            maxEva = np.NINF
+            board = np.array(state.board).flatten()
+            for action in valid_actions:
+                #whos turn?
+                board[action] = 1 if self.player == Player.X else 2 
 
-
-    def minimax(board, depth , maximizingPlayer, player):
+                temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
+                value = MinimaxBot.minimax(temp_state, False)   
+                print(value)
+                temp_state.board[borad_grid[action]] = 0 #reset board
+                temp_state.board.flags.writeable = False
+                # print(value)
+                if value > maxEva:
+                    maxEva = value
+                    move = action
+            
+            return move
+    
+    count = 0
+    
+    
+    def minimax(state, maximizingPlayer):
+        
         #terminal case
-        win = MinimaxBot.checkWinner(board)
-        if win != None:
-            if (win == 1) and (player == Player.X):
-                return 1
-            if (win == 1) and (player == Player.O):
-                return -1
-            if (win == -1) and (player == Player.O):
-                return 1
-            if (win == -1) and (player == Player.X):
-                return -1
-            return win #tie
+        if TicTacToeState.isTerminal(state):
+            return TicTacToeState.utility(state, state.curPlayer)
         
         if maximizingPlayer:
             value = np.NINF
-            for i in range(3):
-                for j in range(3):
-                    if board[i,j] == 0:
-                        if player == Player.X:
-                            board[i,j] = 1
-                        else:
-                            board[i,j] = 2
-                        score = MinimaxBot.minimax(board, depth+1, False, player)
-                        board[i,j] = 0
-                        value = max(value, score)
+            board = np.array(state.board).flatten()
+            valid_actions = TicTacToeState.actions(state)
+            for action in valid_actions:
+                #whos turn
+                board[action] = 1 if state.curPlayer == Player.X else 2
+                
+                temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
+                value = max(value, MinimaxBot.minimax(temp_state, False))
+                temp_state.board[borad_grid[action]] = 0 #reset board
+                temp_state.board.flags.writeable = False
+            
             return value
-
-        # minimizingPlayer
+        #minimizing
         else:
             value = np.Inf
-            for i in range(3):
-                for j in range(3):
-                    if board[i,j] == 0:
-                        if player == Player.X:
-                            board[i,j] = 2
-                        else:
-                            board[i,j] = 1
-                        score = MinimaxBot.minimax(board, depth+1, True, player)
-                        board[i,j] = 0
-                        value = min(value, score)
+            board = np.array(state.board).flatten()
+            valid_actions = TicTacToeState.actions(state)
+            for action in valid_actions:
+                #whos turn
+                board[action] = 2 if state.curPlayer == Player.X else 1
+
+                temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
+                value = min(value, MinimaxBot.minimax(temp_state, True))
+                temp_state.board[borad_grid[action]] = 0 #reset board
+                temp_state.board.flags.writeable = False
             return value
-        
-
-
 class AlphaBetaBot(StupidBot):
 
     def __init__(self, player: Player) -> None:
@@ -322,87 +267,5 @@ class AlphaBetaBot(StupidBot):
 
     # TODO 7: Implement Alpha-Beta Decision algorithm
     def play(self, state: TicTacToeState) -> Union[int, None]:
-        """Return an action to play or None to skip.""" 
-        gBoard = np.array([
-            [0,1,2],
-            [3,4,5],
-            [6,7,8],
-            ])
-        maxEval = np.NINF
-        action = None
-        board = np.array(state.board)
-        empty_board = np.where(state.board.flatten() == 0)
-        if len(empty_board[0]) == 9:
-            return np.random.randint(0, 9)
-        for i in range(3):
-            for j in range(3):
-                if board[i,j] == 0:
-                    if self.player == Player.X:
-                        board[i,j] = 1
-                    else:
-                        board[i,j] = 2
-                    eva = AlphaBetaBot.minimax(board, 0 , False, state.curPlayer, np.NINF, np.Inf)
-                    board[i,j] = 0
-                    if(eva > maxEval):
-                        maxEval = eva
-                        action = (i,j)
-                        
-        return gBoard[action] 
-
-    
-    def minimax( board, depth, maximizingPlayer, player, alpha, beta ):
-        #terminal case
-        win = MinimaxBot.checkWinner(board)
-        if win != None:
-            if (win == 1) and (player == Player.X):
-                return 1
-            if (win == 1) and (player == Player.O):
-                return -1
-            if (win == -1) and (player == Player.O):
-                return 1
-            if (win == -1) and (player == Player.X):
-                return -1
-            return win
-        
-        if maximizingPlayer:
-            value = np.NINF
-            flag = False
-            for i in range(3):
-                for j in range(3):
-                    if board[i,j] == 0:
-                        if player == Player.X:
-                            board[i,j] = 1
-                        else:
-                            board[i,j] = 2
-                        score = AlphaBetaBot.minimax(board, depth+1, False, player, alpha, beta)
-                        board[i,j] = 0
-                        value = max(value, score)
-                        alpha = max(alpha, score)
-                        if beta <= alpha:
-                            flag = True
-                            break
-                if flag:
-                    break
-            return value
-
-        # minimizingPlayer
-        else:
-            value = np.Inf
-            flag = False
-            for i in range(3):
-                for j in range(3):
-                    if board[i,j] == 0:
-                        if player == Player.X:
-                            board[i,j] = 2
-                        else:
-                            board[i,j] = 1
-                        score = AlphaBetaBot.minimax(board, depth+1, True, player, alpha, beta)
-                        board[i,j] = 0
-                        value = min(value, score)
-                        beta = min(beta, score)
-                        if beta <= alpha:
-                            flag = True
-                            break
-                if flag:
-                    break
-            return value
+        """Return an action to play or None to skip."""
+        return super().play(state)
