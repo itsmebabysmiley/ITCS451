@@ -212,11 +212,9 @@ class MinimaxBot(StupidBot):
                 board[action] = 1 if self.player == Player.X else 2 
 
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
-                value = MinimaxBot.minimax(temp_state, False)   
-                # print(value)
+                value = self.minimax(temp_state, False)   
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
-                # print(value)
                 if value > maxEva:
                     maxEva = value
                     move = action
@@ -224,7 +222,7 @@ class MinimaxBot(StupidBot):
             return move
     
     
-    def minimax(state, maximizingPlayer):
+    def minimax(self, state, maximizingPlayer):
         
         #terminal case
         if TicTacToeState.isTerminal(state):
@@ -239,7 +237,7 @@ class MinimaxBot(StupidBot):
                 board[action] = 1 if state.curPlayer == Player.X else 2
                 
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
-                value = max(value, MinimaxBot.minimax(temp_state, False))
+                value = max(value, self.minimax(temp_state, False))
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
             
@@ -254,7 +252,7 @@ class MinimaxBot(StupidBot):
                 board[action] = 2 if state.curPlayer == Player.X else 1
 
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
-                value = min(value, MinimaxBot.minimax(temp_state, True))
+                value = min(value, self.minimax(temp_state, True))
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
             return value
@@ -285,7 +283,7 @@ class AlphaBetaBot(StupidBot):
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
                 alpha = np.NINF
                 beta = np.Inf
-                value = AlphaBetaBot.min_value(temp_state, alpha, beta) 
+                value = self.min_value(temp_state, alpha, beta) 
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
                 # print(value)
@@ -296,7 +294,7 @@ class AlphaBetaBot(StupidBot):
             return move
     
     
-    def max_value(state, alpha, beta):
+    def max_value(self, state, alpha, beta):
         #terminal case
         if TicTacToeState.isTerminal(state):
             return TicTacToeState.utility(state, state.curPlayer)
@@ -309,7 +307,7 @@ class AlphaBetaBot(StupidBot):
             board[action] = 1 if state.curPlayer == Player.X else 2
             
             temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
-            value = max(value, AlphaBetaBot.min_value(temp_state, alpha, beta))
+            value = max(value, self.min_value(temp_state, alpha, beta))
             temp_state.board[borad_grid[action]] = 0 #reset board
             temp_state.board.flags.writeable = False
             if value >= beta:
@@ -318,7 +316,7 @@ class AlphaBetaBot(StupidBot):
         return value
     
     
-    def min_value(state, alpha, beta):
+    def min_value(self, state, alpha, beta):
         #terminal case
         if TicTacToeState.isTerminal(state):
             return TicTacToeState.utility(state, state.curPlayer)
@@ -331,7 +329,7 @@ class AlphaBetaBot(StupidBot):
             board[action] = 2 if state.curPlayer == Player.X else 1
 
             temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
-            value = min(value, AlphaBetaBot.max_value(temp_state, alpha, beta))
+            value = min(value, self.max_value(temp_state, alpha, beta))
             temp_state.board[borad_grid[action]] = 0 #reset board
             temp_state.board.flags.writeable = False
             if value <= alpha:
