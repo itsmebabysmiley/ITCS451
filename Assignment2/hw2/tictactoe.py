@@ -1,10 +1,10 @@
 """This module contains classes and functions for Tic-Tac-Toe.
 
 Members:
-1. Name:  ID:
-2. Name:  ID:
-3. Name:  ID:
-4. Name:  ID:
+1. Name: ID: 6288034
+2. Name: Nopparat Pengsuk ID: 6288103 
+3. Name: ID: 6288107
+4. Name:
 
 """
 from __future__ import annotations
@@ -85,6 +85,7 @@ class TicTacToeState:
         """
         board = np.array(state.board).flatten()
         #action is impossible?
+        # assert board[action] == 0, 'action is impossible'
         if board[action] != 0:
             return None
         else:
@@ -200,7 +201,7 @@ class MinimaxBot(StupidBot):
         if len(valid_actions) == 0:
             return None
         else:
-            #board empty. randomly choose! don't have to thinking!
+            #board empty. randomly choose! don't have to think!
             if len(valid_actions) == 9:
                 return np.random.randint(0, 9)
             
@@ -339,7 +340,9 @@ class AlphaBetaBot(StupidBot):
     
     
 '''
-There are two ways to write alpha-beta. First is fail-hard. Second is fail-soft. I guess you
-you will learn it in CSPs, if Aj. teach.
+Why am I not reuse transition function? answer is somehow I can't use transition because my brain is not working correctly.
+Minimax pseudocode : https://en.wikipedia.org/wiki/Minimax#Pseudocode
+Alpha-Beta pseudocode : Page 170 Ch.5 Adversarial Search (Artificial Intelligence A Modern Approach Third Edition by Stuart J. Russell and Peter Norvig)
+Good source to learn : https://www.youtube.com/watch?v=l-hh51ncgDI
 '''
 #itsmebabysmiley:)
