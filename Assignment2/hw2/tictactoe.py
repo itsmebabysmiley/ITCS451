@@ -1,9 +1,9 @@
 """This module contains classes and functions for Tic-Tac-Toe.
 
 Members:
-1. Name: ID: 6288034
-2. Name: Nopparat Pengsuk ID: 6288103 
-3. Name: ID: 6288107
+1. Name: Pranungfun Prapaenee       ID: 6288034
+2. Name: Nopparat Pengsuk           ID: 6288103 
+3. Name: Pongsakorn Piboonpongpun   ID: 6288107
 4. Name:
 
 """
@@ -84,12 +84,12 @@ class TicTacToeState:
         array y immutable (cannot be changed, for safty).
         """
         board = np.array(state.board).flatten()
-        #action is impossible?
+        # action is impossible?
         # assert board[action] == 0, 'action is impossible'
         if board[action] != 0:
             return None
         else:
-            board[action] = 1 if state.curPlayer == Player.X else 2
+            board[action] = state.curPlayer.value
             board_2d = np.reshape(board, (3, 3))
             next_player = Player.O if state.curPlayer == Player.X else Player.X
             board_2d.flags.writeable = False
@@ -102,13 +102,13 @@ class TicTacToeState:
     def isTerminal(cls, state: TicTacToeState) -> bool:
         """Return `True` is the `state` is terminal (end of the game)."""
         #3 possible ways that borad will terminate; playerX won or playerO won or Tie
-        positions = np.where(state.board.flatten() == 1)
+        posX = np.where(state.board.flatten() == 1)
         for w in win:
-            if all(x in positions[0] for x in w):
+            if all(x in posX[0] for x in w):
                 return True #plauer X won
-        positions = np.where(state.board.flatten() == 2)
+        posO = np.where(state.board.flatten() == 2)
         for w in win:
-            if all(x in positions[0] for x in w):
+            if all(x in posO[0] for x in w):
                 return True #player O won
         full = np.where(state.board.flatten() == 0)
         if full[0].size == 0:
@@ -127,22 +127,17 @@ class TicTacToeState:
         The `player` can be different than the `state`.`curPlayer`.
         """
         #You can use any value but I prefer -1,0,1 which are lose, tie and won respectively.
-        positions = np.where(state.board.flatten() == 1)
+        posX = np.where(state.board.flatten() == 1)
         for w in win:
-            if all(x in positions[0] for x in w):
-                if player == Player.X:
-                    return 1 #player X won
-                else:
-                    return -1
-        positions = np.where(state.board.flatten() == 2)
+            if all(x in posX[0] for x in w):
+                return 1 if player == Player.X else -1 #player X won(1) lost(-1)
+        posO = np.where(state.board.flatten() == 2)
         for w in win:
-            if all(x in positions[0] for x in w):
-                if player == Player.O:
-                    return 1 #player O won
-                else:
-                    return -1
-        
-        return 0 #tie
+            if all(x in posO[0] for x in w):
+                return 1 if player == Player.O else -1 #player O won(1) lost(-1)
+        #tie
+        return 0 
+
 
     def __repr__(self) -> str:
         a = [[symbol_map[c] for c in row] for row in self.board]
@@ -216,6 +211,7 @@ class MinimaxBot(StupidBot):
                 value = self.minimax(temp_state, False)   
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
+                # print(value)
                 if value > maxEva:
                     maxEva = value
                     move = action
@@ -236,7 +232,6 @@ class MinimaxBot(StupidBot):
             for action in valid_actions:
                 #whos turn
                 board[action] = 1 if state.curPlayer == Player.X else 2
-                
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
                 value = max(value, self.minimax(temp_state, False))
                 temp_state.board[borad_grid[action]] = 0 #reset board
@@ -251,12 +246,13 @@ class MinimaxBot(StupidBot):
             for action in valid_actions:
                 #whos turn
                 board[action] = 2 if state.curPlayer == Player.X else 1
-
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)), state.curPlayer)
                 value = min(value, self.minimax(temp_state, True))
                 temp_state.board[borad_grid[action]] = 0 #reset board
                 temp_state.board.flags.writeable = False
             return value
+        
+        
 class AlphaBetaBot(StupidBot):
 
     def __init__(self, player: Player) -> None:
@@ -280,7 +276,6 @@ class AlphaBetaBot(StupidBot):
             for action in valid_actions:
                 #whos turn?
                 board[action] = 1 if self.player == Player.X else 2 
-
                 temp_state = TicTacToeState(np.reshape(board, (3, 3)),self.player)
                 alpha = np.NINF
                 beta = np.Inf
@@ -340,7 +335,7 @@ class AlphaBetaBot(StupidBot):
     
     
 '''
-Why am I not reuse transition function? answer is somehow I can't use transition because my brain is not working correctly.
+Why am I not reuse transition function? answer is I guess a lot of people will use transition function but I want to be difference >_<
 Minimax pseudocode : https://en.wikipedia.org/wiki/Minimax#Pseudocode
 Alpha-Beta pseudocode : Page 170 Ch.5 Adversarial Search (Artificial Intelligence A Modern Approach Third Edition by Stuart J. Russell and Peter Norvig)
 Good source to learn : https://www.youtube.com/watch?v=l-hh51ncgDI
