@@ -265,7 +265,7 @@ def graph_search(
                             if not open_set.is_in(neighbor_loc):                            
                                 open_set.add(neighbor_node.position, neighbor_node, f_score[neighbor_loc])
                     else:
-                        #smile to the camare!
+                        #smile to the camara!
                         pass
                 #greedy search
                 else:
